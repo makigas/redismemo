@@ -1,0 +1,24 @@
+package redismemo // import "gopkg.makigas.es/redismemo"
+
+Package redismemo provides a basic memoization system around Redis.
+
+It works by wrapping a go-redis/v9 client and providing a simple function that
+can be used to fetch a value from Redis given its key, as well as the compute
+function to be issued if the value is not found in the Redis instance. If the
+value has to be computed, it is also set in the Redis instance using the given
+TTL, which comes handy for caches.
+
+TYPES
+
+type Compute func() string
+    Compute is a lazy function that when evaluated returns a string value.
+    Computes are used as a fallback if the cache does not hold the given key.
+
+type Memo func(ctx context.Context, key string, value Compute, exp time.Duration) (string, error)
+    Memo is a function that memoizes values in a cache. Memo returns the string
+    identified by the given cache key. If the cache does not hold the key,
+    it computes the value and stores it with the given expiration TTL.
+
+func RedisMemo(rdb *redis.Client) Memo
+    RedisMemo wraps a Redis client to provide a memoization function.
+
